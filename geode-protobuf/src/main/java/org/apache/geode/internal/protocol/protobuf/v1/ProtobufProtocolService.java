@@ -24,6 +24,10 @@ import org.apache.geode.internal.protocol.protobuf.statistics.ClientStatistics;
 import org.apache.geode.internal.protocol.protobuf.statistics.NoOpStatistics;
 import org.apache.geode.internal.protocol.protobuf.statistics.ProtobufClientStatistics;
 import org.apache.geode.internal.protocol.protobuf.v1.state.ProtobufConnectionHandshakeStateProcessor;
+import org.apache.geode.internal.protocol.protobuf.Handshake;
+import org.apache.geode.internal.protocol.protobuf.statistics.MicrometerClientStatsImpl;
+import org.apache.geode.internal.protocol.statistics.NoOpStatistics;
+import org.apache.geode.internal.protocol.statistics.ProtocolClientStatistics;
 import org.apache.geode.internal.security.SecurityService;
 
 public class ProtobufProtocolService implements ClientProtocolService {
@@ -33,7 +37,8 @@ public class ProtobufProtocolService implements ClientProtocolService {
   @Override
   public synchronized void initializeStatistics(String statisticsName, StatisticsFactory factory) {
     if (statistics == null) {
-      statistics = new ProtobufClientStatistics(factory, statisticsName);
+      // statistics = new ProtobufClientStatisticsImpl(factory, statisticsName);
+      statistics = new MicrometerClientStatsImpl();
     }
   }
 
