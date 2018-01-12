@@ -144,7 +144,7 @@ public class CreateBucketMessage extends PartitionMessage {
     }
     r.checkReadiness();
     InternalDistributedMember primary = r.getRedundancyProvider().createBucketAtomically(bucketId,
-        bucketSize, startTime, false, partitionName);
+        bucketSize,  false, partitionName);
     r.getPrStats().endPartitionMessagesProcessing(startTime);
     CreateBucketReplyMessage.sendResponse(getSender(), getProcessorId(), dm, primary);
     return false;

@@ -180,12 +180,12 @@ public interface MemberMXBean {
   void shutDownMember();
 
   /**
-   * Returns JVM metrics.
+   * Returns JVM meterRegistry.
    */
   JVMMetrics showJVMMetrics();
 
   /**
-   * Returns operating system metrics.
+   * Returns operating system meterRegistry.
    */
   OSMetrics showOSMetrics();
 
