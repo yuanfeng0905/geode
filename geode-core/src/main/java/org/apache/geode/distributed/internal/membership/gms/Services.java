@@ -40,6 +40,7 @@ import org.apache.geode.distributed.internal.membership.gms.locator.GMSLocator;
 import org.apache.geode.distributed.internal.membership.gms.membership.GMSJoinLeave;
 import org.apache.geode.distributed.internal.membership.gms.messenger.JGroupsMessenger;
 import org.apache.geode.distributed.internal.membership.gms.mgr.GMSMembershipManager;
+import org.apache.geode.distributed.internal.membership.gms.tcpmessenger.NettyTcpMessenger;
 import org.apache.geode.internal.admin.remote.RemoteTransportConfig;
 import org.apache.geode.internal.logging.InternalLogWriter;
 import org.apache.geode.internal.logging.LogService;
@@ -128,7 +129,8 @@ public class Services {
     this.manager = new GMSMembershipManager(listener);
     this.joinLeave = new GMSJoinLeave();
     this.healthMon = new GMSHealthMonitor();
-    this.messenger = new JGroupsMessenger();
+//    this.messenger = new JGroupsMessenger();
+    this.messenger = new NettyTcpMessenger();
     this.securityService = securityService;
     this.auth = new GMSAuthenticator();
   }
