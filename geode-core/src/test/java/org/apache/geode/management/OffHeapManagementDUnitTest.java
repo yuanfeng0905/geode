@@ -199,8 +199,8 @@ public class OffHeapManagementDUnitTest extends CacheTestCase {
     assertOffHeapMetricsOnVm(vm, TOTAL_MEMORY, 0, 0, 0);
 
     /*
-     * Perform ops on the off-heap region and assert that the off-heap meterRegistry correctly reflect the
-     * ops
+     * Perform ops on the off-heap region and assert that the off-heap meterRegistry correctly
+     * reflect the ops
      */
     doPutOnVm(vm, KEY, VALUE, OFF_HEAP_REGION_NAME, false);
     assertOffHeapMetricsOnVm(vm, (TOTAL_MEMORY - OBJECT_SIZE), OBJECT_SIZE, 1, 0);

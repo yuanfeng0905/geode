@@ -45,7 +45,8 @@ public class ShowMetricsJUnitTest {
   @Test
   public void testPortOnly() throws Exception {
     ShowMetricsCommand command = spy(ShowMetricsCommand.class);
-    CommandResult result = parser.executeCommandWithInstance(command, "show meterRegistry --port=0");
+    CommandResult result =
+        parser.executeCommandWithInstance(command, "show meterRegistry --port=0");
     assertThat(result.getStatus()).isEqualTo(Result.Status.ERROR);
     assertThat(result.getContent().toString()).contains(
         "If the --port parameter is specified, then the --member parameter must also be specified.");
@@ -54,7 +55,8 @@ public class ShowMetricsJUnitTest {
   @Test
   public void invalidPortNumber() throws Exception {
     ShowMetricsCommand command = spy(ShowMetricsCommand.class);
-    CommandResult result = parser.executeCommandWithInstance(command, "show meterRegistry --port=abc");
+    CommandResult result =
+        parser.executeCommandWithInstance(command, "show meterRegistry --port=abc");
     assertThat(result.getStatus()).isEqualTo(Result.Status.ERROR);
     // When relying on Spring's converters, any command that does not parse is "Invalid"
     assertThat(result.getContent().toString()).contains("Invalid command");

@@ -733,7 +733,7 @@ public class PartitionedRegion extends LocalRegion
 
     this.node = initializeNode();
     this.prStats = new TimedMicrometerPartitionedRegionStats(getFullPath());
-//    this.prStats = new PartitionedRegionStatsImpl(cache.getDistributedSystem(), getFullPath());
+    // this.prStats = new PartitionedRegionStatsImpl(cache.getDistributedSystem(), getFullPath());
     this.regionIdentifier = getFullPath().replace('/', '#');
 
     if (logger.isDebugEnabled()) {
@@ -3265,8 +3265,7 @@ public class PartitionedRegion extends LocalRegion
     // Potentially no storage assigned, start bucket creation, be careful of race
     // conditions
     if (isDataStore()) {
-      ret = this.redundancyProvider.createBucketAtomically(bucketId, size, false,
-          partitionName);
+      ret = this.redundancyProvider.createBucketAtomically(bucketId, size, false, partitionName);
     } else {
       ret = this.redundancyProvider.createBucketOnDataStore(bucketId, size, snoozer);
     }

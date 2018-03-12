@@ -495,8 +495,8 @@ public class PRHARedundancyProvider {
    *         region referred to in the query.
    */
   public InternalDistributedMember createBucketAtomically(final int bucketId,
-      final int newBucketSize,  final boolean finishIncompleteCreation,
-      String partitionName) throws PartitionedRegionStorageException, PartitionedRegionException,
+      final int newBucketSize, final boolean finishIncompleteCreation, String partitionName)
+      throws PartitionedRegionStorageException, PartitionedRegionException,
       PartitionOfflineException {
     final boolean isDebugEnabled = logger.isDebugEnabled();
 

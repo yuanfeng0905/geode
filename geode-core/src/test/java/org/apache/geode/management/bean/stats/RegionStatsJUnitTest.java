@@ -17,13 +17,13 @@ package org.apache.geode.management.bean.stats;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.geode.internal.cache.PartitionedRegionStatsImpl;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import org.apache.geode.internal.cache.CachePerfStats;
 import org.apache.geode.internal.cache.DiskRegionStats;
 import org.apache.geode.internal.cache.PartitionedRegionStats;
+import org.apache.geode.internal.cache.PartitionedRegionStatsImpl;
 import org.apache.geode.management.internal.beans.DiskRegionBridge;
 import org.apache.geode.management.internal.beans.PartitionedRegionBridge;
 import org.apache.geode.management.internal.beans.RegionMBeanBridge;

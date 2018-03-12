@@ -67,6 +67,7 @@ class TimedMicrometerPartitionedRegionStats(meterRegistry: MeterRegistry, region
     }
 
     private fun updateTimer(startTimeInNanos: Long, timer: Timer) {
-        timer.record((System.nanoTime() - startTimeInNanos), TimeUnit.NANOSECONDS)
+        val diff = System.nanoTime() - startTimeInNanos
+        timer.record(diff, TimeUnit.NANOSECONDS)
     }
 }

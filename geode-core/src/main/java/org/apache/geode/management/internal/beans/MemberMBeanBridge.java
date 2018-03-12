@@ -756,9 +756,9 @@ public class MemberMBeanBridge {
   }
 
   /**
-   * All OS meterRegistry are not present in java.lang.management.OperatingSystemMXBean It has to be cast
-   * to com.sun.management.OperatingSystemMXBean. To avoid the cast using dynamic call so that Java
-   * platform will take care of the details in a native manner;
+   * All OS meterRegistry are not present in java.lang.management.OperatingSystemMXBean It has to be
+   * cast to com.sun.management.OperatingSystemMXBean. To avoid the cast using dynamic call so that
+   * Java platform will take care of the details in a native manner;
    *
    * @return Some basic OS meterRegistry at the particular instance
    */
