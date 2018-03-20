@@ -1,18 +1,18 @@
 package org.apache.geode.internal.protocol.protobuf.statistics
 
-import io.micrometer.core.instrument.Clock
-import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry
-import io.micrometer.influx.InfluxConfig
-import io.micrometer.influx.InfluxMeterRegistry
-import io.micrometer.jmx.JmxMeterRegistry
 import org.apache.geode.internal.cache.MicroMeterRegistryFactory
-import org.apache.geode.internal.protocol.statistics.ProtocolClientStatistics
-import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
-class MicrometerClientStatsImpl(val meterRegistry: MeterRegistry) : ProtocolClientStatistics {
+open class MicrometerClientStatsImpl(val meterRegistry: MeterRegistry) : ClientStatistics {
+    override fun startOperation(): Long {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun endOperation(startOperationTime: Long) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     constructor() : this(MicroMeterRegistryFactory.getMeterRegistry())
 
     private val clientsConnected = AtomicInteger(0)

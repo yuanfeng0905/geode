@@ -10,10 +10,7 @@ import java.lang.Number
 import java.util.concurrent.atomic.AtomicInteger
 
 open class MicrometerPartitionRegionStats(val meterRegistry: MeterRegistry, val regionName: String) : PartitionedRegionStats {
-    override fun getStats(): Statistics? {
-        //we do nothing here... because we don't need to
-        return null;
-    }
+    override fun getStats(): Statistics? = null
 
     @Suppress("PropertyName")
     protected val PARTITIONED_REGION = "PartitionedRegion"

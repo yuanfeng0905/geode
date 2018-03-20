@@ -41,10 +41,12 @@ dependencies {
     // External
     provided files("${System.getProperty('java.home')}/../lib/tools.jar")
 
-    compile group: 'io.micrometer', name: 'micrometer-core', version: '1.0.0-rc.5'
-    compile group: 'io.micrometer', name: 'micrometer-registry-atlas', version: '1.0.0-rc.5'
-    compile group: 'io.micrometer', name: 'micrometer-registry-influx', version: '1.0.0-rc.5'
-    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: '1.0.0-rc.5'
+    compile group: 'io.micrometer', name: 'micrometer-core', version: '1.0.1'
+    compile group: 'io.micrometer', name: 'micrometer-registry-atlas', version: '1.0.1'
+    compile group: 'io.micrometer', name: 'micrometer-registry-influx', version: '1.0.1'
+    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: '1.0.1'
+
+    compile group: 'io.pivotal.gemfire', name: 'stats', version: '1.0-SNAPSHOT'
 
 
     compile 'com.github.stephenc.findbugs:findbugs-annotations:' + project.'stephenc-findbugs.version'
@@ -162,6 +164,7 @@ dependencies {
 
     testRuntime 'xerces:xercesImpl:' + project.'xercesImpl.version'
     testCompile project(':geode-concurrency-test')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 def generatedResources = "$buildDir/generated-resources/main"
@@ -249,7 +252,7 @@ dependencies {
 
 tasks.eclipse.dependsOn(generateGrammarSource)
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.30'
     repositories {
         mavenCentral()
     }
@@ -259,6 +262,7 @@ buildscript {
 }
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 compileKotlin {
     kotlinOptions {
