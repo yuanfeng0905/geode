@@ -41,10 +41,10 @@ dependencies {
     // External
     provided files("${System.getProperty('java.home')}/../lib/tools.jar")
 
-    compile group: 'io.micrometer', name: 'micrometer-core', version: '1.0.1'
-    compile group: 'io.micrometer', name: 'micrometer-registry-atlas', version: '1.0.1'
-    compile group: 'io.micrometer', name: 'micrometer-registry-influx', version: '1.0.1'
-    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: '1.0.1'
+    compile group: 'io.micrometer', name: 'micrometer-core', version: '1.0.2'
+    compile group: 'io.micrometer', name: 'micrometer-registry-atlas', version: '1.0.2'
+    compile group: 'io.micrometer', name: 'micrometer-registry-influx', version: '1.0.2'
+    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: '1.0.2'
 
     compile group: 'io.pivotal.gemfire', name: 'stats', version: '1.0-SNAPSHOT'
 
