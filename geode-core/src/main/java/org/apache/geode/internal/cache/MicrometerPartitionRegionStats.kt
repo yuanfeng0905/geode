@@ -6,8 +6,7 @@ import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
 import org.apache.geode.Statistics
-import java.lang.Number
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.LongAdder
 
 open class MicrometerPartitionRegionStats(val meterRegistry: MeterRegistry, val regionName: String) : PartitionedRegionStats {
     override fun getStats(): Statistics? = null
@@ -23,8 +22,8 @@ open class MicrometerPartitionRegionStats(val meterRegistry: MeterRegistry, val 
     private fun <T> constructGaugeForMetric(metricName: String, atomic: T, function: (T) -> Double): Gauge = Gauge.builder(metricName, atomic, function).tags(tags).register(meterRegistry)
 
 
-    private fun incrementAtomic(atomic: AtomicInteger, value: Int) {
-        atomic.addAndGet(value)
+    private fun incrementAtomic(atomic: LongAdder, value: Int) {
+        atomic.add(value.toLong())
     }
 
     private fun incrementAtomic(atomic: AtomicDouble, value: Double) {
@@ -32,12 +31,12 @@ open class MicrometerPartitionRegionStats(val meterRegistry: MeterRegistry, val 
     }
 
     //Atomic values to track
-    private val bucketCountAtomic = AtomicInteger(0)
-    private val lowBucketCountAtomic = AtomicInteger(0)
-    private val numberCopiesBucketCountAtomic = AtomicInteger(0)
-    private val totalNumberOfBucketsAtomic = AtomicInteger(0)
-    private val primaryBucketCountAtomic = AtomicInteger(0)
-    private val numberVolunteeringThreadsAtomic = AtomicInteger(0)
+    private val bucketCountAtomic = LongAdder()
+    private val lowBucketCountAtomic = LongAdder()
+    private val numberCopiesBucketCountAtomic = LongAdder()
+    private val totalNumberOfBucketsAtomic = LongAdder()
+    private val primaryBucketCountAtomic = LongAdder()
+    private val numberVolunteeringThreadsAtomic = LongAdder()
 
     //Micrometer Meters
     private val putCounter = constructCounterForMetric("put")
@@ -69,12 +68,12 @@ open class MicrometerPartitionRegionStats(val meterRegistry: MeterRegistry, val 
     private val removeAllMsgsRetriedCounter = constructCounterForMetric("removeAllMsgsRetried")
     private val partitionMessagesSentCounter = constructCounterForMetric("partitionMessagesSent")
     private val prMetaDataSentCounter = constructCounterForMetric("prMetaDataSentCounter")
-    private val bucketCountGauge = constructGaugeForMetric("bucketCount", bucketCountAtomic, { it.get().toDouble() })
-    private val lowBucketCountGauge = constructGaugeForMetric("lowBucketCount", lowBucketCountAtomic, { it.get().toDouble() })
-    private val numberCopiesBucketCountGauge = constructGaugeForMetric("numberCopiesBucketCount", numberCopiesBucketCountAtomic, { it.get().toDouble() })
-    private val totalNumberOfBucketsGauge = constructGaugeForMetric("totalNumberOfBuckets", totalNumberOfBucketsAtomic, { it.get().toDouble() })
-    private val primaryBucketCountGauge = constructGaugeForMetric("primaryBucketCount", primaryBucketCountAtomic, { it.get().toDouble() })
-    private val numberVolunteeringThreadsGauge = constructGaugeForMetric("numberVolunteeringThreads", numberVolunteeringThreadsAtomic, { it.get().toDouble() })
+    private val bucketCountGauge = constructGaugeForMetric("bucketCount", bucketCountAtomic, { it.toDouble() })
+    private val lowBucketCountGauge = constructGaugeForMetric("lowBucketCount", lowBucketCountAtomic, { it.toDouble() })
+    private val numberCopiesBucketCountGauge = constructGaugeForMetric("numberCopiesBucketCount", numberCopiesBucketCountAtomic, { it.toDouble() })
+    private val totalNumberOfBucketsGauge = constructGaugeForMetric("totalNumberOfBuckets", totalNumberOfBucketsAtomic, { it.toDouble() })
+    private val primaryBucketCountGauge = constructGaugeForMetric("primaryBucketCount", primaryBucketCountAtomic, { it.toDouble() })
+    private val numberVolunteeringThreadsGauge = constructGaugeForMetric("numberVolunteeringThreads", numberVolunteeringThreadsAtomic, { it.toDouble() })
 
     override fun close() {
         //Noop
