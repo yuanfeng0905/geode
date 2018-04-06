@@ -22,9 +22,13 @@ An inline cache holds region entries for a client application.
 
 ## Description of an Inline Cache
 
-A cache is formed from a region within a <%=vars.product_name%> cluster,
-and the cache sits between the client application and a
+An inline cache holds data for quick access.
+The inline cache comprises 
+a Geode region together with code deployed to servers that host 
+the region.
+The inline cache sits between the client application and a
 backing data store.
+The server-deployed code communicates with the backend data store.
 
 <img src="../images/inline-cache.png" id="inline-cache-png" class="image" />
 
@@ -36,9 +40,10 @@ it quickly responds with the value for a lookup operation.
 This is a cache hit.
 If the requested region entry is not in the region,
 it is a cache miss,
-and code that has been deployed to the server acquires the
+and the code deployed to the server acquires the
 entry from the data store.
-The acquired region entry is written to the region
+<GEODE> writes the
+acquired region entry to the region
 such that future lookups will cause a cache hit.
 
 ## Implementation and Configuration
