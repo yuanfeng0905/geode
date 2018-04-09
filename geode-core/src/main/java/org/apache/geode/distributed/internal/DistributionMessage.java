@@ -568,23 +568,14 @@ public abstract class DistributionMessage implements DataSerializableFixedID, Cl
    * classes that override this method should always invoke the inherited method
    * (<code>super.toData()</code>).
    */
-  public void toData(DataOutput out) throws IOException {
-    // DataSerializer.writeObject(this.recipients, out); // no need to serialize; filled in later
-    // ((IpAddress)this.sender).toData(out); // no need to serialize; filled in later
-    // out.writeLong(this.timeStamp);
-  }
+  public void toData(DataOutput out) throws IOException {}
 
   /**
    * Reads the contents of this <code>DistributionMessage</code> from the given input. Note that
    * classes that override this method should always invoke the inherited method
    * (<code>super.fromData()</code>).
    */
-  public void fromData(DataInput in) throws IOException, ClassNotFoundException {
-
-    // this.recipients = (Set)DataSerializer.readObject(in); // no to deserialize; filled in later
-    // this.sender = DataSerializer.readIpAddress(in); // no to deserialize; filled in later
-    // this.timeStamp = (long)in.readLong();
-  }
+  public void fromData(DataInput in) throws IOException, ClassNotFoundException {}
 
   /**
    * Returns a timestamp, in nanos, associated with this message.

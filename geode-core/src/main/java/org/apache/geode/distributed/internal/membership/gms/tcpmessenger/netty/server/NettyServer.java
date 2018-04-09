@@ -1,3 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.distributed.internal.membership.gms.tcpmessenger.netty.server;
 
 import java.net.InetSocketAddress;
@@ -28,28 +42,25 @@ public class NettyServer {
     workerGroup = new NioEventLoopGroup();
 
     ServerBootstrap bootstrap = new ServerBootstrap();
-    bootstrap.localAddress("localhost", 0)
-        .group(acceptorGroup, workerGroup)
+    bootstrap.localAddress("localhost", 0).group(acceptorGroup, workerGroup)
         .channel(NioServerSocketChannel.class)
         .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                          ch.pipeline().addLast(new DataSerializableDecoder());
-                          ch.pipeline().addLast(broadcaster);
+          @Override
+          protected void initChannel(SocketChannel ch) throws Exception {
+            ch.pipeline().addLast(new DataSerializableDecoder());
+            ch.pipeline().addLast(broadcaster);
 
-                        }
-                      });
+          }
+        });
 
-            channelFuture = bootstrap.bind().sync();
+    channelFuture = bootstrap.bind().sync();
   }
 
   public InetSocketAddress getAddress() {
     return (InetSocketAddress) channelFuture.channel().localAddress();
   }
 
-  public void addHandler(
-      Class<? extends DistributionMessage> clazz,
-      MessageHandler handler) {
+  public void addHandler(Class<? extends DistributionMessage> clazz, MessageHandler handler) {
     broadcaster.addHandler(clazz, handler);
   }
 

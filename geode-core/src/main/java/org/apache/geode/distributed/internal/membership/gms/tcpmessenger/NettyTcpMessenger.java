@@ -1,3 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.distributed.internal.membership.gms.tcpmessenger;
 
 import java.net.InetSocketAddress;
@@ -39,7 +53,7 @@ public class NettyTcpMessenger implements Messenger {
 
   @Override
   public Set<InternalDistributedMember> send(DistributionMessage m) {
-    for(InternalDistributedMember member : m.getRecipients()) {
+    for (InternalDistributedMember member : m.getRecipients()) {
       client.send(new InetSocketAddress(member.getHost(), member.getPort()), m);
     }
 
@@ -68,7 +82,7 @@ public class NettyTcpMessenger implements Messenger {
 
   @Override
   public void getMessageState(InternalDistributedMember member, Map state,
-                              boolean includeMulticast) {
+      boolean includeMulticast) {
 
   }
 
@@ -125,7 +139,7 @@ public class NettyTcpMessenger implements Messenger {
 
     InetSocketAddress serverAddress = server.getAddress();
 
-    //This junk all came from JGroupsMessenger. Refactor into a common class?
+    // This junk all came from JGroupsMessenger. Refactor into a common class?
     DistributionConfig config = services.getConfig().getDistributionConfig();
     boolean isLocator = (services.getConfig().getTransport()
         .getVmKind() == ClusterDistributionManager.LOCATOR_DM_TYPE)
@@ -141,8 +155,8 @@ public class NettyTcpMessenger implements Messenger {
         OSProcess.getId(), services.getConfig().getTransport().getVmKind(),
         -1/* view id - not known at this time */, config.getName(),
         MemberAttributes.parseGroups(config.getRoles(), config.getGroups()), dca);
-    localAddress = new InternalDistributedMember(serverAddress.getAddress(), serverAddress.getPort(),
-        config.getEnableNetworkPartitionDetection(), isLocator, attr);
+    localAddress = new InternalDistributedMember(serverAddress.getAddress(),
+        serverAddress.getPort(), config.getEnableNetworkPartitionDetection(), isLocator, attr);
 
   }
 
@@ -165,7 +179,7 @@ public class NettyTcpMessenger implements Messenger {
   public void installView(NetView v) {
     Set<InternalDistributedMember> crashedMembers = v.getActualCrashedMembers(currentView);
     this.currentView = v;
-    for(InternalDistributedMember member : crashedMembers) {
+    for (InternalDistributedMember member : crashedMembers) {
       client.shutdown(new InetSocketAddress(member.getHost(), member.getPort()));
     }
 
@@ -193,7 +207,7 @@ public class NettyTcpMessenger implements Messenger {
 
   @Override
   public void memberSuspected(InternalDistributedMember initiator,
-                              InternalDistributedMember suspect, String reason) {
+      InternalDistributedMember suspect, String reason) {
 
   }
 }
