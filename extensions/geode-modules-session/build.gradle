@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 dependencies {
-  compile project(':extensions/geode-modules-session-internal')
+  compile project(':extensions:geode-modules-session-internal')
   compile project(':geode-core')
 
   testCompile 'javax.servlet:javax.servlet-api:' + project.'javax.servlet-api.version'

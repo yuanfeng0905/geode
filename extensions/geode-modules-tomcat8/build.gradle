@@ -14,10 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 dependencies {
-  compile(project(':extensions/geode-modules')) {
+  compile(project(':extensions:geode-modules')) {
     exclude group: 'org.apache.tomcat'
   }
 
@@ -40,7 +38,7 @@ dependencies {
 
   testCompile project(path: ':geode-junit')
   testCompile files(project(':geode-core').sourceSets.test.output)
-  testCompile files(project(':extensions/geode-modules').sourceSets.test.output)
+  testCompile files(project(':extensions:geode-modules').sourceSets.test.output)
   testCompile files(project(':geode-old-versions').sourceSets.main.output)
 
   eclipse.classpath.file {

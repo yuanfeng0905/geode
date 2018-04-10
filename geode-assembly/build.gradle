@@ -85,16 +85,16 @@ dependencies {
 
   testCompile group: 'org.codehaus.cargo', name: 'cargo-core-uberjar', version: '1.6.3'
 
-  testCompile (project(':extensions/geode-modules')) {
+  testCompile (project(':extensions:geode-modules')) {
     // Remove everything related to Tomcat
     exclude group: 'org.apache.tomcat'
   }
-  testCompile (project(':extensions/geode-modules-session-internal')) {
+  testCompile (project(':extensions:geode-modules-session-internal')) {
     // Remove everything related to Tomcat
     exclude group: 'org.apache.tomcat'
   }
 
-  testCompile project(':extensions/session-testing-war')
+  testCompile project(':extensions:session-testing-war')
 
   testCompile 'org.seleniumhq.selenium:selenium-api:' + project.'selenium.version'
   testCompile 'org.seleniumhq.selenium:selenium-chrome-driver:' + project.'selenium.version'
@@ -424,9 +424,9 @@ distributions {
         from (project(":geode-pulse").configurations.archives.allArtifacts.files)
       }
 
-      into ('tools/Modules') {
-        from (project(':extensions/geode-modules-assembly').configurations.moduleDistOutputs.files)
-      }
+//      into ('tools/Modules') {
+//        from (project(':extensions:geode-modules-assembly').configurations.moduleDistOutputs.files)
+//      }
     }
   }
 }
@@ -457,7 +457,7 @@ flakyTest dependOnInstalledProduct
 // Make build final task to generate all test and product resources
 build.dependsOn installDist
 
-installDist.dependsOn ':extensions/geode-modules-assembly:dist'
+installDist.dependsOn ':extensions:geode-modules-assembly:dist'
 distributedTest.dependsOn ':extensions/session-testing-war:war'
 distributedTest.dependsOn ':geode-old-versions:build'
 
