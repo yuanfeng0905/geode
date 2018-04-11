@@ -424,9 +424,9 @@ distributions {
         from (project(":geode-pulse").configurations.archives.allArtifacts.files)
       }
 
-//      into ('tools/Modules') {
-//        from (project(':extensions:geode-modules-assembly').configurations.moduleDistOutputs.files)
-//      }
+      into ('tools/Modules') {
+        from (project(':extensions:geode-modules-assembly').configurations.moduleDistOutputs.files)
+      }
     }
   }
 }
@@ -458,7 +458,7 @@ flakyTest dependOnInstalledProduct
 build.dependsOn installDist
 
 installDist.dependsOn ':extensions:geode-modules-assembly:dist'
-distributedTest.dependsOn ':extensions/session-testing-war:war'
+distributedTest.dependsOn ':extensions:session-testing-war:war'
 distributedTest.dependsOn ':geode-old-versions:build'
 
 /**Print the names of all jar files in a fileTree */

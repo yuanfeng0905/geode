@@ -39,6 +39,7 @@ rat {
     '**/build/**',
     '**/build-*/**',
     '.buildinfo',
+    '.gradletasknamecache',
 
     // Geode examples
     'geode-examples/.idea/**',
