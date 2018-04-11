@@ -163,7 +163,8 @@ public class ProtobufStructSerializerTest {
   public void testSymmetry(
       @When(
           seed = 793351614853016898L) @PdxInstanceGenerator.ClassName(ProtobufStructSerializer.PROTOBUF_STRUCT) @PdxInstanceGenerator.FieldTypes({
-              String.class, int.class, long.class, byte.class, byte[].class, PdxInstance.class,
+              String.class, int.class, long.class, byte.class, byte[].class, double.class,
+              PdxInstance.class,
               ArrayList.class}) @From(PdxInstanceGenerator.class) PdxInstance original)
       throws IOException, ClassNotFoundException {
     ByteString bytes = serializer.serialize(original);

@@ -72,6 +72,9 @@ public class ProtobufStructSerializer implements ValueSerializer {
     } else if (value instanceof Long) {
       builder.setEncodedValue(
           BasicTypes.EncodedValue.newBuilder().setLongResult((Long) value).build());
+    } else if (value instanceof Double) {
+      builder.setEncodedValue(
+          BasicTypes.EncodedValue.newBuilder().setDoubleResult((Double) value).build());
     } else if (value instanceof byte[]) {
       builder.setEncodedValue(BasicTypes.EncodedValue.newBuilder()
           .setBinaryResult(UnsafeByteOperations.unsafeWrap((byte[]) value)).build());
@@ -115,6 +118,8 @@ public class ProtobufStructSerializer implements ValueSerializer {
         pdxInstanceFactory.writeLong(fieldName, (Long) value);
       } else if (value instanceof byte[]) {
         pdxInstanceFactory.writeByteArray(fieldName, (byte[]) value);
+      } else if (value instanceof Double) {
+        pdxInstanceFactory.writeDouble(fieldName, (Double) value);
       } else if (value instanceof PdxInstance) {
         pdxInstanceFactory.writeObject(fieldName, value);
       } else if (value instanceof List) {
