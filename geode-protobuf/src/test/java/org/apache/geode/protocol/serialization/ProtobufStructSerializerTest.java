@@ -161,15 +161,12 @@ public class ProtobufStructSerializerTest {
 
   @Property(trials = 10)
   public void testSymmetry(
-      @When(
-          seed = 793351614853016898L) @PdxInstanceGenerator.ClassName(ProtobufStructSerializer.PROTOBUF_STRUCT) @PdxInstanceGenerator.FieldTypes({
-              String.class, int.class, long.class, byte.class, byte[].class, double.class,
-              PdxInstance.class,
-              ArrayList.class}) @From(PdxInstanceGenerator.class) PdxInstance original)
+      @PdxInstanceGenerator.ClassName(ProtobufStructSerializer.PROTOBUF_STRUCT) @PdxInstanceGenerator.FieldTypes({
+          String.class, int.class, long.class, byte.class, byte[].class, double.class,
+          PdxInstance.class,
+          ArrayList.class}) @From(PdxInstanceGenerator.class) PdxInstance original)
       throws IOException, ClassNotFoundException {
     ByteString bytes = serializer.serialize(original);
-    Struct struct = Struct.parseFrom(bytes);
-    bytes = struct.toByteString();
     PdxInstance actual = (PdxInstance) serializer.deserialize(bytes);
     assertThat(original).isEqualTo(actual);
     assertEquals(actual, original);

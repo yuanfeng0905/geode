@@ -41,7 +41,7 @@ public class ProtobufStructSerializer implements ValueSerializer {
     return serializeStruct(object).toByteString();
   }
 
-  private Struct serializeStruct(Object object) {
+  Struct serializeStruct(Object object) {
 
     PdxInstance pdxInstance = (PdxInstance) object;
 
