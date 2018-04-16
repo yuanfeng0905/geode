@@ -425,7 +425,7 @@ distributions {
       }
 
       into ('tools/Modules') {
-        from (project(':extensions:geode-modules-assembly').configurations.moduleDistOutputs.files)
+        from (project(':extensions:geode-modules-assembly').configurations.archives.allArtifacts.files)
       }
     }
   }
