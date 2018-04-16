@@ -17,11 +17,6 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-configurations {
-  slf4jDeps
-  moduleDistOutputs
-}
-
 jar.enabled = true
 extraArchive {
     sources = false
