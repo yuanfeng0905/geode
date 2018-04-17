@@ -14,6 +14,7 @@
  */
 package org.apache.geode.experimental.driver;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,7 @@ class ProtobufChannel {
   final Socket socket;
   final BufferedOutputStream output;
   private final ValueSerializer serializer;
+  private final BufferedInputStream input;
 
   public ProtobufChannel(final Set<InetSocketAddress> locators, String username, String password,
       String keyStorePath, String trustStorePath, String protocols, String ciphers,
@@ -49,6 +51,7 @@ class ProtobufChannel {
     socket = connectToAServer(locators, username, password, keyStorePath, trustStorePath, protocols,
         ciphers);
     output = new BufferedOutputStream(socket.getOutputStream(), socket.getSendBufferSize());
+    input = new BufferedInputStream(socket.getInputStream(), socket.getReceiveBufferSize());
   }
 
   public void close() throws IOException {
@@ -212,8 +215,7 @@ class ProtobufChannel {
   }
 
   private Message readResponse() throws IOException {
-    final InputStream inputStream = socket.getInputStream();
-    Message response = ClientProtocol.Message.parseDelimitedFrom(inputStream);
+    Message response = ClientProtocol.Message.parseDelimitedFrom(input);
     if (response == null) {
       throw new IOException("Unable to parse a response message due to EOF");
     }

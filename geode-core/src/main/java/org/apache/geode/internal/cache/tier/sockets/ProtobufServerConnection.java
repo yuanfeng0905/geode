@@ -15,6 +15,7 @@
 
 package org.apache.geode.internal.cache.tier.sockets;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import org.apache.geode.internal.security.SecurityService;
 public class ProtobufServerConnection extends ServerConnection {
   // The new protocol lives in a separate module and gets loaded when this class is instantiated.
   private final ClientProtocolProcessor protocolProcessor;
+  private final BufferedInputStream input;
   private boolean cleanedUp;
   private ClientProxyMembershipID clientProxyMembershipID;
   private final BufferedOutputStream output;
@@ -58,6 +60,7 @@ public class ProtobufServerConnection extends ServerConnection {
     this.protocolProcessor = clientProtocolProcessor;
 
     this.output = new BufferedOutputStream(socket.getOutputStream(), socketBufferSize);
+    this.input = new BufferedInputStream(socket.getInputStream(), socketBufferSize);
     setClientProxyMembershipId();
 
     doHandShake(CommunicationMode.ProtobufClientServerProtocol.getModeNumber(), 0);
@@ -67,12 +70,11 @@ public class ProtobufServerConnection extends ServerConnection {
   protected void doOneMessage() {
     Socket socket = this.getSocket();
     try {
-      InputStream inputStream = socket.getInputStream();
 
       InternalCache cache = getCache();
       cache.setReadSerializedForCurrentThread(true);
       try {
-        protocolProcessor.processMessage(inputStream, output);
+        protocolProcessor.processMessage(input, output);
         output.flush();
       } finally {
         cache.setReadSerializedForCurrentThread(false);
