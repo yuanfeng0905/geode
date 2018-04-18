@@ -25,14 +25,9 @@ import org.apache.geode.internal.Version;
 import org.apache.geode.internal.cache.EnumListenerEvent;
 import org.apache.geode.internal.cache.EventID;
 import org.apache.geode.internal.cache.LocalRegion;
-import org.apache.geode.internal.cache.tier.Acceptor;
 import org.apache.geode.internal.cache.tier.MessageType;
 import org.apache.geode.internal.cache.versions.VersionSource;
 
-/**
- *
- *
- */
 public class ClientTombstoneMessage extends ClientUpdateMessageImpl {
 
   enum TOperation {
@@ -155,7 +150,7 @@ public class ClientTombstoneMessage extends ClientUpdateMessageImpl {
 
   @Override
   public boolean isClientInterested(ClientProxyMembershipID clientId) {
-    return Acceptor.VERSION.compareTo(Version.GFE_70) >= 0;
+    return true;
   }
 
   @Override

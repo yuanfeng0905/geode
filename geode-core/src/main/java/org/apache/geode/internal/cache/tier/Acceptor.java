@@ -16,7 +16,6 @@ package org.apache.geode.internal.cache.tier;
 
 import java.io.IOException;
 
-import org.apache.geode.internal.Version;
 import org.apache.geode.internal.cache.tier.sockets.CacheClientNotifier;
 
 /**
@@ -26,13 +25,6 @@ import org.apache.geode.internal.cache.tier.sockets.CacheClientNotifier;
  * @since GemFire 2.0.2
  */
 public interface Acceptor {
-
-  /**
-   * The GFE version of the server.
-   *
-   * @since GemFire 5.7
-   */
-  Version VERSION = Version.CURRENT.getGemFireVersion();
 
   /**
    * Listens for a client to connect and establishes a connection to that client.

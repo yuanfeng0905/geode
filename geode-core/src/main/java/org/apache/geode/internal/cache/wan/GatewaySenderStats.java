@@ -46,6 +46,8 @@ public class GatewaySenderStats {
   protected static final String EVENT_QUEUE_TIME = "eventQueueTime";
   /** Name of the event queue size statistic */
   protected static final String EVENT_QUEUE_SIZE = "eventQueueSize";
+  /** Name of the event secondary queue size statistic */
+  protected static final String EVENT_SECONDARY_QUEUE_SIZE = "eventSecondaryQueueSize";
   /** Name of the event temporary queue size statistic */
   protected static final String TMP_EVENT_QUEUE_SIZE = "tempQueueSize";
   /** Name of the events distributed statistic */
@@ -84,6 +86,8 @@ public class GatewaySenderStats {
 
   protected static final String EVENTS_FILTERED = "eventsFiltered";
   protected static final String NOT_QUEUED_EVENTS = "notQueuedEvent";
+  protected static final String NOT_QUEUED_EVENTS_AT_YET_RUNNING_PRIMARY_SENDER =
+      "notQueuedEventAtYetRunningPrimarySender";
 
   protected static final String LOAD_BALANCES_COMPLETED = "loadBalancesCompleted";
   protected static final String LOAD_BALANCES_IN_PROGRESS = "loadBalancesInProgress";
@@ -102,6 +106,8 @@ public class GatewaySenderStats {
   protected static int eventQueueTimeId;
   /** Id of the event queue size statistic */
   protected static int eventQueueSizeId;
+  /** Id of the event in secondary queue size statistic */
+  protected static int eventSecondaryQueueSizeId;
   /** Id of the temp event queue size statistic */
   protected static int eventTmpQueueSizeId;
   /** Id of the events distributed statistic */
@@ -135,6 +141,8 @@ public class GatewaySenderStats {
   protected static int eventsFilteredId;
   /** Id of not queued events */
   protected static int notQueuedEventsId;
+  /** Id of not queued events due to the primary sender is yet running */
+  protected static int notQueuedEventsAtYetRunningPrimarySenderId;
   /** Id of events conflated in batch */
   protected static int eventsConflatedFromBatchesId;
   /** Id of load balances completed */
@@ -164,6 +172,8 @@ public class GatewaySenderStats {
             f.createLongCounter(EVENT_QUEUE_TIME, "Total time spent queueing events.",
                 "nanoseconds"),
             f.createIntGauge(EVENT_QUEUE_SIZE, "Size of the event queue.", "operations", false),
+            f.createIntGauge(EVENT_SECONDARY_QUEUE_SIZE, "Size of secondary event queue.",
+                "operations", false),
             f.createIntGauge(TMP_EVENT_QUEUE_SIZE, "Size of the temporary events.", "operations",
                 false),
             f.createIntCounter(EVENTS_NOT_QUEUED_CONFLATED,
@@ -213,6 +223,8 @@ public class GatewaySenderStats {
             f.createIntGauge(CONFLATION_INDEXES_MAP_SIZE,
                 "Current number of entries in the conflation indexes map.", "events"),
             f.createIntCounter(NOT_QUEUED_EVENTS, "Number of events not added to queue.", "events"),
+            f.createIntCounter(NOT_QUEUED_EVENTS_AT_YET_RUNNING_PRIMARY_SENDER,
+                "Number of events not added to primary queue due to sender yet running.", "events"),
             f.createIntCounter(EVENTS_FILTERED,
                 "Number of events filtered through GatewayEventFilter.", "events"),
             f.createIntCounter(LOAD_BALANCES_COMPLETED, "Number of load balances completed",
@@ -232,6 +244,7 @@ public class GatewaySenderStats {
     eventsNotQueuedConflatedId = type.nameToId(EVENTS_NOT_QUEUED_CONFLATED);
     eventQueueTimeId = type.nameToId(EVENT_QUEUE_TIME);
     eventQueueSizeId = type.nameToId(EVENT_QUEUE_SIZE);
+    eventSecondaryQueueSizeId = type.nameToId(EVENT_SECONDARY_QUEUE_SIZE);
     eventTmpQueueSizeId = type.nameToId(TMP_EVENT_QUEUE_SIZE);
     eventsDistributedId = type.nameToId(EVENTS_DISTRIBUTED);
     eventsExceedingAlertThresholdId = type.nameToId(EVENTS_EXCEEDING_ALERT_THRESHOLD);
@@ -249,6 +262,8 @@ public class GatewaySenderStats {
     unprocessedTokenMapSizeId = type.nameToId(UNPROCESSED_TOKEN_MAP_SIZE);
     conflationIndexesMapSizeId = type.nameToId(CONFLATION_INDEXES_MAP_SIZE);
     notQueuedEventsId = type.nameToId(NOT_QUEUED_EVENTS);
+    notQueuedEventsAtYetRunningPrimarySenderId =
+        type.nameToId(NOT_QUEUED_EVENTS_AT_YET_RUNNING_PRIMARY_SENDER);
     eventsFilteredId = type.nameToId(EVENTS_FILTERED);
     eventsConflatedFromBatchesId = type.nameToId(EVENTS_CONFLATED_FROM_BATCHES);
     loadBalancesCompletedId = type.nameToId(LOAD_BALANCES_COMPLETED);
@@ -347,6 +362,15 @@ public class GatewaySenderStats {
    */
   public int getEventQueueSize() {
     return this.stats.getInt(eventQueueSizeId);
+  }
+
+  /**
+   * Returns the current value of the "eventSecondaryQueueSize" stat.
+   *
+   * @return the current value of the "eventSecondaryQueueSize" stat
+   */
+  public int getEventSecondaryQueueSize() {
+    return this.stats.getInt(eventSecondaryQueueSizeId);
   }
 
   /**
@@ -454,6 +478,15 @@ public class GatewaySenderStats {
   }
 
   /**
+   * Sets the "eventSecondaryQueueSize" stat.
+   *
+   * @param size The size of the secondary queue
+   */
+  public void setSecondaryQueueSize(int size) {
+    this.stats.setInt(eventSecondaryQueueSizeId, size);
+  }
+
+  /**
    * Sets the "tempQueueSize" stat.
    *
    * @param size The size of the temp queue
@@ -468,6 +501,14 @@ public class GatewaySenderStats {
    */
   public void incQueueSize() {
     this.stats.incInt(eventQueueSizeId, 1);
+  }
+
+  /**
+   * Increments the "eventSecondaryQueueSize" stat by 1.
+   */
+  public void incSecondaryQueueSize() {
+    this.stats.incInt(eventSecondaryQueueSizeId, 1);
+    assert this.stats.getInt(eventSecondaryQueueSizeId) >= 0;
   }
 
   /**
@@ -487,6 +528,16 @@ public class GatewaySenderStats {
   }
 
   /**
+   * Increments the "eventSecondaryQueueSize" stat by given delta.
+   *
+   * @param delta an integer by which secondary queue size to be increased
+   */
+  public void incSecondaryQueueSize(int delta) {
+    this.stats.incInt(eventSecondaryQueueSizeId, delta);
+    assert this.stats.getInt(eventSecondaryQueueSizeId) >= 0;
+  }
+
+  /**
    * Increments the "tempQueueSize" stat by given delta.
    *
    * @param delta an integer by which temp queue size to be increased
@@ -503,6 +554,14 @@ public class GatewaySenderStats {
   }
 
   /**
+   * Decrements the "eventSecondaryQueueSize" stat by 1.
+   */
+  public void decSecondaryQueueSize() {
+    this.stats.incInt(eventSecondaryQueueSizeId, -1);
+    assert this.stats.getInt(eventSecondaryQueueSizeId) >= 0;
+  }
+
+  /**
    * Decrements the "tempQueueSize" stat by 1.
    */
   public void decTempQueueSize() {
@@ -516,6 +575,16 @@ public class GatewaySenderStats {
    */
   public void decQueueSize(int delta) {
     this.stats.incInt(eventQueueSizeId, -delta);
+  }
+
+  /**
+   * Decrements the "eventSecondaryQueueSize" stat by given delta.
+   *
+   * @param delta an integer by which secondary queue size to be increased
+   */
+  public void decSecondaryQueueSize(int delta) {
+    this.stats.incInt(eventSecondaryQueueSizeId, -delta);
+    assert this.stats.getInt(eventSecondaryQueueSizeId) >= 0;
   }
 
   /**
@@ -597,6 +666,14 @@ public class GatewaySenderStats {
 
   public int getEventsNotQueued() {
     return this.stats.getInt(notQueuedEventsId);
+  }
+
+  public void incEventsNotQueuedAtYetRunningPrimarySender() {
+    this.stats.incInt(notQueuedEventsAtYetRunningPrimarySenderId, 1);
+  }
+
+  public int getEventsNotQueuedAtYetRunningPrimarySender() {
+    return this.stats.getInt(notQueuedEventsAtYetRunningPrimarySenderId);
   }
 
   public void incEventsFiltered() {

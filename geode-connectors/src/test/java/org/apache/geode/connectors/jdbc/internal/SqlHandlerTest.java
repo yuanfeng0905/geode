@@ -34,7 +34,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import junitparams.JUnitParamsRunner;
 import org.junit.Before;
@@ -48,6 +47,7 @@ import org.apache.geode.InternalGemFireException;
 import org.apache.geode.cache.Operation;
 import org.apache.geode.cache.Region;
 import org.apache.geode.connectors.jdbc.JdbcConnectorException;
+import org.apache.geode.connectors.jdbc.internal.configuration.ConnectorService;
 import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.pdx.internal.PdxInstanceImpl;
 import org.apache.geode.pdx.internal.PdxType;
@@ -66,7 +66,7 @@ public class SqlHandlerTest {
 
   private DataSourceManager manager;
   private JdbcDataSource dataSource;
-  private ConnectionConfiguration connectionConfig;
+  private ConnectorService.Connection connectionConfig;
   private JdbcConnectorService connectorService;
   private TableMetaDataManager tableMetaDataManager;
   private TableMetaDataView tableMetaDataView;
@@ -75,7 +75,7 @@ public class SqlHandlerTest {
   private InternalCache cache;
   private SqlHandler handler;
   private PreparedStatement statement;
-  private RegionMapping regionMapping;
+  private ConnectorService.RegionMapping regionMapping;
   private PdxInstanceImpl value;
   private Object key;
 
@@ -84,7 +84,7 @@ public class SqlHandlerTest {
   public void setup() throws Exception {
     manager = mock(DataSourceManager.class);
     dataSource = mock(JdbcDataSource.class);
-    connectionConfig = mock(ConnectionConfiguration.class);
+    connectionConfig = mock(ConnectorService.Connection.class);
     when(connectionConfig.getName()).thenReturn(CONNECTION_CONFIG_NAME);
     when(connectionConfig.getUrl()).thenReturn("fake:url");
     region = mock(Region.class);
@@ -106,13 +106,12 @@ public class SqlHandlerTest {
 
     when(connectorService.getConnectionConfig(CONNECTION_CONFIG_NAME)).thenReturn(connectionConfig);
 
-    regionMapping = mock(RegionMapping.class);
+    regionMapping = mock(ConnectorService.RegionMapping.class);
     when(regionMapping.getConnectionConfigName()).thenReturn(CONNECTION_CONFIG_NAME);
     when(regionMapping.getRegionName()).thenReturn(REGION_NAME);
     when(regionMapping.getTableName()).thenReturn(TABLE_NAME);
     when(regionMapping.getRegionToTableName()).thenReturn(TABLE_NAME);
     when(connectorService.getMappingForRegion(REGION_NAME)).thenReturn(regionMapping);
-
 
     when(manager.getOrCreateDataSource(any())).thenReturn(this.dataSource);
     when(dataSource.getConnection()).thenReturn(this.connection);
@@ -146,7 +145,7 @@ public class SqlHandlerTest {
     @SuppressWarnings("unchecked")
     Region<Object, Object> region2 = mock(Region.class);
     when(region2.getName()).thenReturn("region2");
-    RegionMapping regionMapping2 = mock(RegionMapping.class);
+    ConnectorService.RegionMapping regionMapping2 = mock(ConnectorService.RegionMapping.class);
     when(regionMapping2.getConnectionConfigName()).thenReturn("bogus connection name");
     when(regionMapping2.getRegionName()).thenReturn("region2");
     when(connectorService.getMappingForRegion("region2")).thenReturn(regionMapping2);
@@ -519,11 +518,12 @@ public class SqlHandlerTest {
     ResultSet primaryKeys = getPrimaryKeysMetaData();
     when(primaryKeys.next()).thenReturn(true).thenReturn(false);
 
-    List<ColumnValue> columnValueList =
-        handler.getColumnToValueList(tableMetaDataView, regionMapping, key, value, Operation.GET);
+    EntryColumnData entryColumnData =
+        handler.getEntryColumnData(tableMetaDataView, regionMapping, key, value, Operation.GET);
 
-    assertThat(columnValueList).hasSize(1);
-    assertThat(columnValueList.get(0).getColumnName()).isEqualTo(KEY_COLUMN);
+    assertThat(entryColumnData.getEntryKeyColumnData()).isNotNull();
+    assertThat(entryColumnData.getEntryValueColumnData()).isEmpty();
+    assertThat(entryColumnData.getEntryKeyColumnData().getColumnName()).isEqualTo(KEY_COLUMN);
   }
 
   @Test
@@ -535,12 +535,14 @@ public class SqlHandlerTest {
     when(primaryKeys.next()).thenReturn(true).thenReturn(false);
     when(value.getFieldNames()).thenReturn(Arrays.asList(KEY_COLUMN, nonKeyColumn));
 
-    List<ColumnValue> columnValueList = handler.getColumnToValueList(tableMetaDataView,
-        regionMapping, key, value, Operation.UPDATE);
+    EntryColumnData entryColumnData =
+        handler.getEntryColumnData(tableMetaDataView, regionMapping, key, value, Operation.UPDATE);
 
-    assertThat(columnValueList).hasSize(2);
-    assertThat(columnValueList.get(0).getColumnName()).isEqualTo(nonKeyColumn);
-    assertThat(columnValueList.get(1).getColumnName()).isEqualTo(KEY_COLUMN);
+    assertThat(entryColumnData.getEntryKeyColumnData()).isNotNull();
+    assertThat(entryColumnData.getEntryValueColumnData()).hasSize(1);
+    assertThat(entryColumnData.getEntryValueColumnData().get(0).getColumnName())
+        .isEqualTo(nonKeyColumn);
+    assertThat(entryColumnData.getEntryKeyColumnData().getColumnName()).isEqualTo(KEY_COLUMN);
   }
 
   @Test
@@ -548,11 +550,12 @@ public class SqlHandlerTest {
     ResultSet primaryKeys = getPrimaryKeysMetaData();
     when(primaryKeys.next()).thenReturn(true).thenReturn(false);
 
-    List<ColumnValue> columnValueList = handler.getColumnToValueList(tableMetaDataView,
-        regionMapping, key, value, Operation.DESTROY);
+    EntryColumnData entryColumnData =
+        handler.getEntryColumnData(tableMetaDataView, regionMapping, key, value, Operation.DESTROY);
 
-    assertThat(columnValueList).hasSize(1);
-    assertThat(columnValueList.get(0).getColumnName()).isEqualTo(KEY_COLUMN);
+    assertThat(entryColumnData.getEntryKeyColumnData()).isNotNull();
+    assertThat(entryColumnData.getEntryValueColumnData()).isEmpty();
+    assertThat(entryColumnData.getEntryKeyColumnData().getColumnName()).isEqualTo(KEY_COLUMN);
   }
 
   private ResultSet getPrimaryKeysMetaData() throws SQLException {

@@ -16,9 +16,6 @@ package org.apache.geode.protocol.serialization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,9 +25,7 @@ import java.util.List;
 import com.google.protobuf.ByteString;
 import com.pholser.junit.quickcheck.From;
 import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.When;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,7 +42,6 @@ import org.apache.geode.internal.protocol.protobuf.v1.Struct;
 import org.apache.geode.internal.protocol.protobuf.v1.Value;
 import org.apache.geode.pdx.PdxInstance;
 import org.apache.geode.test.junit.categories.IntegrationTest;
-import org.apache.geode.test.junit.categories.UnitTest;
 
 @RunWith(JUnitQuickcheck.class)
 @Category(IntegrationTest.class)

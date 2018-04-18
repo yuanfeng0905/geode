@@ -12,23 +12,50 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.connectors.jdbc.internal.xml;
+package org.apache.geode.connectors.jdbc.internal;
 
-import static org.apache.geode.connectors.jdbc.internal.xml.JdbcConnectorServiceXmlParser.NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.sql.JDBCType;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import org.apache.geode.test.junit.categories.UnitTest;
 
 @Category(UnitTest.class)
-public class JdbcConnectorServiceXmlGeneratorTest {
+public class ColumnDataTest {
+
+  private static final String COLUMN_NAME = "columnName";
+  private static final Object VALUE = new Object();
+  private static final JDBCType DATA_TYPE = JDBCType.VARCHAR;
+
+  private ColumnData value;
+
+  @Before
+  public void setup() {
+    value = new ColumnData(COLUMN_NAME, VALUE, DATA_TYPE.getVendorTypeNumber());
+  }
 
   @Test
-  public void returnsCorrectNamespace() {
-    JdbcConnectorServiceXmlGenerator generator = new JdbcConnectorServiceXmlGenerator(null, null);
+  public void hasCorrectColumnName() {
+    assertThat(value.getColumnName()).isEqualTo(COLUMN_NAME);
+  }
 
-    assertThat(generator.getNamespaceUri()).isEqualTo(NAMESPACE);
+  @Test
+  public void hasCorrectValue() {
+    assertThat(value.getValue()).isSameAs(VALUE);
+  }
+
+  @Test
+  public void hasCorrectDataType() {
+    assertThat(value.getDataType()).isSameAs(DATA_TYPE.getVendorTypeNumber());
+  }
+
+  @Test
+  public void toStringContainsAllVariables() {
+    assertThat(value.toString()).contains(COLUMN_NAME).contains(VALUE.toString())
+        .contains(DATA_TYPE.toString());
   }
 }

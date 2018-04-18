@@ -33,8 +33,8 @@ import org.mockito.ArgumentCaptor;
 
 import org.apache.geode.cache.execute.FunctionContext;
 import org.apache.geode.cache.execute.ResultSender;
-import org.apache.geode.connectors.jdbc.internal.ConnectionConfiguration;
 import org.apache.geode.connectors.jdbc.internal.JdbcConnectorService;
+import org.apache.geode.connectors.jdbc.internal.configuration.ConnectorService;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.DistributedSystem;
 import org.apache.geode.internal.cache.InternalCache;
@@ -48,11 +48,11 @@ public class ListConnectionFunctionTest {
   private ResultSender<Object> resultSender;
   private JdbcConnectorService service;
 
-  private ConnectionConfiguration connectionConfig1;
-  private ConnectionConfiguration connectionConfig2;
-  private ConnectionConfiguration connectionConfig3;
+  private ConnectorService.Connection connectionConfig1;
+  private ConnectorService.Connection connectionConfig2;
+  private ConnectorService.Connection connectionConfig3;
 
-  private Set<ConnectionConfiguration> expected;
+  private Set<ConnectorService.Connection> expected;
 
   private ListConnectionFunction function;
 
@@ -65,9 +65,9 @@ public class ListConnectionFunctionTest {
     service = mock(JdbcConnectorService.class);
     DistributedSystem system = mock(DistributedSystem.class);
 
-    connectionConfig1 = mock(ConnectionConfiguration.class);
-    connectionConfig2 = mock(ConnectionConfiguration.class);
-    connectionConfig3 = mock(ConnectionConfiguration.class);
+    connectionConfig1 = mock(ConnectorService.Connection.class);
+    connectionConfig2 = mock(ConnectorService.Connection.class);
+    connectionConfig3 = mock(ConnectorService.Connection.class);
 
     expected = new HashSet<>();
 
@@ -106,7 +106,8 @@ public class ListConnectionFunctionTest {
     expected.add(connectionConfig2);
     expected.add(connectionConfig3);
 
-    ConnectionConfiguration[] actual = function.getConnectionConfigAsArray(service);
+    Set<ConnectorService.Connection> actual =
+        function.getFunctionResult(service, mock(FunctionContext.class));
 
     assertThat(actual).containsExactlyInAnyOrder(connectionConfig1, connectionConfig2,
         connectionConfig3);
@@ -114,7 +115,8 @@ public class ListConnectionFunctionTest {
 
   @Test
   public void getConnectionConfigsReturnsEmpty() {
-    ConnectionConfiguration[] actual = function.getConnectionConfigAsArray(service);
+    Set<ConnectorService.Connection> actual =
+        function.getFunctionResult(service, mock(FunctionContext.class));
 
     assertThat(actual).isEmpty();
   }
@@ -127,7 +129,7 @@ public class ListConnectionFunctionTest {
 
     function.execute(context);
 
-    ArgumentCaptor<Object[]> argument = ArgumentCaptor.forClass(Object[].class);
+    ArgumentCaptor<Set<ConnectorService.Connection>> argument = ArgumentCaptor.forClass(Set.class);
     verify(resultSender, times(1)).lastResult(argument.capture());
     assertThat(argument.getValue()).containsExactlyInAnyOrder(connectionConfig1, connectionConfig2,
         connectionConfig3);
@@ -137,7 +139,7 @@ public class ListConnectionFunctionTest {
   public void executeReturnsEmptyResultForNoConfigs() {
     function.execute(context);
 
-    ArgumentCaptor<Object[]> argument = ArgumentCaptor.forClass(Object[].class);
+    ArgumentCaptor<Set<ConnectorService.Connection>> argument = ArgumentCaptor.forClass(Set.class);
     verify(resultSender, times(1)).lastResult(argument.capture());
     assertThat(argument.getValue()).isEmpty();
   }
@@ -150,7 +152,7 @@ public class ListConnectionFunctionTest {
 
     ArgumentCaptor<CliFunctionResult> argument = ArgumentCaptor.forClass(CliFunctionResult.class);
     verify(resultSender, times(1)).lastResult(argument.capture());
-    assertThat(argument.getValue().getMessage()).contains(NullPointerException.class.getName());
+    assertThat(argument.getValue().getStatus()).contains(NullPointerException.class.getName());
   }
 
   @Test
@@ -161,7 +163,7 @@ public class ListConnectionFunctionTest {
 
     ArgumentCaptor<CliFunctionResult> argument = ArgumentCaptor.forClass(CliFunctionResult.class);
     verify(resultSender, times(1)).lastResult(argument.capture());
-    assertThat(argument.getValue().getMessage()).contains("some message")
+    assertThat(argument.getValue().getStatus()).contains("some message")
         .doesNotContain(IllegalArgumentException.class.getName());
   }
 }

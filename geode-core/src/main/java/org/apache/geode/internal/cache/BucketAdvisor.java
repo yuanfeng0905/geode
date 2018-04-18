@@ -314,6 +314,7 @@ public class BucketAdvisor extends CacheDistributionAdvisor {
           if (b instanceof BucketRegionQueue) {
             BucketRegionQueue brq = (BucketRegionQueue) b;
             brq.decQueueSize(brq.size());
+            brq.incSecondaryQueueSize(brq.size());
           }
         }
       }
@@ -488,7 +489,6 @@ public class BucketAdvisor extends CacheDistributionAdvisor {
    * We can't call this method from BucketAdvisor.profileRemoved, because the primaryElector may not
    * actually host the bucket.
    *
-   * @param profile
    */
   public void checkForLostPrimaryElector(Profile profile) {
     // If the member that went away was in the middle of creating
@@ -680,7 +680,6 @@ public class BucketAdvisor extends CacheDistributionAdvisor {
   /**
    * Only for local profile.
    *
-   * @param p
    */
   public synchronized void updateServerBucketProfile(BucketProfile p) {
     this.localProfile = p;
@@ -1191,6 +1190,7 @@ public class BucketAdvisor extends CacheDistributionAdvisor {
           if (br instanceof BucketRegionQueue) { // Shouldn't it be AbstractBucketRegionQueue
             BucketRegionQueue brq = (BucketRegionQueue) br;
             brq.incQueueSize(brq.size());
+            brq.decSecondaryQueueSize(brq.size());
           }
           if (br != null && br instanceof BucketRegion) {
             ((BucketRegion) br).afterAcquiringPrimaryState();
@@ -2725,7 +2725,6 @@ public class BucketAdvisor extends CacheDistributionAdvisor {
      *
      * @param volunteeringTask the task to queue and then execute in waiting thread pool
      *
-     * @throws InterruptedException
      */
     private void execute(Runnable volunteeringTask) throws InterruptedException {
       // @todo: instead of having a semaphore and queue on RegionAdvisor

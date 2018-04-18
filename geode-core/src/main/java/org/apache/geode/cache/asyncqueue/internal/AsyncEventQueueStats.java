@@ -26,7 +26,7 @@ public class AsyncEventQueueStats extends GatewaySenderStats {
   public static final String typeName = "AsyncEventQueueStatistics";
 
   /** The <code>StatisticsType</code> of the statistics */
-  private static final StatisticsType type;
+  public static final StatisticsType type;
 
 
   static {
@@ -42,6 +42,8 @@ public class AsyncEventQueueStats extends GatewaySenderStats {
             f.createLongCounter(EVENT_QUEUE_TIME, "Total time spent queueing events.",
                 "nanoseconds"),
             f.createIntGauge(EVENT_QUEUE_SIZE, "Size of the event queue.", "operations", false),
+            f.createIntGauge(EVENT_SECONDARY_QUEUE_SIZE, "Size of the secondary event queue.",
+                "operations", false),
             f.createIntGauge(TMP_EVENT_QUEUE_SIZE, "Size of the temporary events queue.",
                 "operations", false),
             f.createIntCounter(EVENTS_NOT_QUEUED_CONFLATED,
@@ -87,6 +89,8 @@ public class AsyncEventQueueStats extends GatewaySenderStats {
             f.createIntGauge(CONFLATION_INDEXES_MAP_SIZE,
                 "Current number of entries in the conflation indexes map.", "events"),
             f.createIntCounter(NOT_QUEUED_EVENTS, "Number of events not added to queue.", "events"),
+            f.createIntCounter(NOT_QUEUED_EVENTS_AT_YET_RUNNING_PRIMARY_SENDER,
+                "Number of events not added to primary queue due to sender yet running.", "events"),
             f.createIntCounter(EVENTS_FILTERED,
                 "Number of events filtered through GatewayEventFilter.", "events"),
             f.createIntCounter(LOAD_BALANCES_COMPLETED, "Number of load balances completed",
@@ -106,6 +110,7 @@ public class AsyncEventQueueStats extends GatewaySenderStats {
     eventsNotQueuedConflatedId = type.nameToId(EVENTS_NOT_QUEUED_CONFLATED);
     eventQueueTimeId = type.nameToId(EVENT_QUEUE_TIME);
     eventQueueSizeId = type.nameToId(EVENT_QUEUE_SIZE);
+    eventSecondaryQueueSizeId = type.nameToId(EVENT_SECONDARY_QUEUE_SIZE);
     eventTmpQueueSizeId = type.nameToId(TMP_EVENT_QUEUE_SIZE);
     eventsDistributedId = type.nameToId(EVENTS_DISTRIBUTED);
     eventsExceedingAlertThresholdId = type.nameToId(EVENTS_EXCEEDING_ALERT_THRESHOLD);
@@ -122,6 +127,8 @@ public class AsyncEventQueueStats extends GatewaySenderStats {
     unprocessedTokenMapSizeId = type.nameToId(UNPROCESSED_TOKEN_MAP_SIZE);
     conflationIndexesMapSizeId = type.nameToId(CONFLATION_INDEXES_MAP_SIZE);
     notQueuedEventsId = type.nameToId(NOT_QUEUED_EVENTS);
+    notQueuedEventsAtYetRunningPrimarySenderId =
+        type.nameToId(NOT_QUEUED_EVENTS_AT_YET_RUNNING_PRIMARY_SENDER);
     eventsFilteredId = type.nameToId(EVENTS_FILTERED);
     eventsConflatedFromBatchesId = type.nameToId(EVENTS_CONFLATED_FROM_BATCHES);
     loadBalancesCompletedId = type.nameToId(LOAD_BALANCES_COMPLETED);

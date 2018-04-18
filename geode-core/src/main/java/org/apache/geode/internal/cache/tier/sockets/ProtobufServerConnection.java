@@ -19,13 +19,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.apache.geode.cache.IncompatibleVersionException;
-import org.apache.geode.cache.client.PoolFactory;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.internal.ServerLocation;
 import org.apache.geode.distributed.internal.membership.InternalDistributedMember;
@@ -76,6 +73,11 @@ public class ProtobufServerConnection extends ServerConnection {
       try {
         protocolProcessor.processMessage(input, output);
         output.flush();
+        try {
+          protocolProcessor.processMessage(input, output);
+        } finally {
+          output.flush();
+        }
       } finally {
         cache.setReadSerializedForCurrentThread(false);
       }

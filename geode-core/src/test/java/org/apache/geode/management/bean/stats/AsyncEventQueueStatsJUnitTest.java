@@ -19,14 +19,11 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import org.apache.geode.StatisticDescriptor;
 import org.apache.geode.cache.asyncqueue.internal.AsyncEventQueueStats;
 import org.apache.geode.management.internal.beans.AsyncEventQueueMBeanBridge;
 import org.apache.geode.test.junit.categories.IntegrationTest;
 
-/**
- *
- *
- */
 @Category(IntegrationTest.class)
 public class AsyncEventQueueStatsJUnitTest extends MBeanStatsTestCase {
 
@@ -52,12 +49,27 @@ public class AsyncEventQueueStatsJUnitTest extends MBeanStatsTestCase {
     sample();
 
     assertEquals(0, getEventQueueSize());
-
-
   }
 
   private int getEventQueueSize() {
     return bridge.getEventQueueSize();
+  }
+
+  @Test
+  public void testStatDescriptors() {
+    StatisticDescriptor[] sds = asyncEventQueueStats.type.getStatistics();
+    int notQueueEvents = 0;
+    int notQueueToPrimary = 0;
+    for (StatisticDescriptor s : sds) {
+      if (s.getName().equals("notQueuedEvent")) {
+        notQueueEvents++;
+      }
+      if (s.getName().equals("notQueuedEventAtYetRunningPrimarySender")) {
+        notQueueToPrimary++;
+      }
+    }
+    assertEquals(1, notQueueEvents);
+    assertEquals(1, notQueueToPrimary);
   }
 
 }

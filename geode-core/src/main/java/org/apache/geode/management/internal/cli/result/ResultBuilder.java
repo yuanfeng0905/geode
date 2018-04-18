@@ -15,7 +15,6 @@
 package org.apache.geode.management.internal.cli.result;
 
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -157,10 +156,6 @@ public class ResultBuilder {
     return new CompositeResultData();
   }
 
-  public static <T extends CliJsonSerializable> ObjectResultData<T> createObjectResultData() {
-    return new ObjectResultData<>();
-  }
-
   /**
    * Creates a {@link InfoResultData} object to start building result that is required to be shown
    * as an information without any specific format.
@@ -190,6 +185,11 @@ public class ResultBuilder {
   }
 
   public static CommandResult buildResult(List<CliFunctionResult> functionResults) {
+    return buildResult(functionResults, null, null);
+  }
+
+  public static CommandResult buildResult(List<CliFunctionResult> functionResults, String header,
+      String footer) {
     TabularResultData tabularData = ResultBuilder.createTabularResultData();
     boolean success = false;
     for (CliFunctionResult result : functionResults) {
@@ -201,14 +201,22 @@ public class ResultBuilder {
       }
     }
 
+    if (header != null) {
+      tabularData.setHeader(header);
+    }
+    if (footer != null) {
+      tabularData.setFooter(footer);
+    }
+
     tabularData.setStatus(success ? Result.Status.OK : Result.Status.ERROR);
     return ResultBuilder.buildResult(tabularData);
   }
 
+
   /**
    * Prepare Result from JSON. Type of result is expected to there in the JSON as 'contentType'
    * which should be one of {@link ResultData#TYPE_TABULAR}, {@link ResultData#TYPE_COMPOSITE},
-   * {@link ResultData#TYPE_INFO}, {@link ResultData#TYPE_ERROR}, {@link ResultData#TYPE_OBJECT}.
+   * {@link ResultData#TYPE_INFO}, {@link ResultData#TYPE_ERROR}.
    *
    * @param gfJsonObject GemFire JSON Object to use to prepare Result
    */
@@ -239,8 +247,6 @@ public class ResultBuilder {
         resultData = new ErrorResultData(data);
       } else if (ResultData.TYPE_COMPOSITE.equals(contentType)) {
         resultData = new CompositeResultData(data);
-      } else if (ResultData.TYPE_OBJECT.equals(contentType)) {
-        resultData = new ObjectResultData<>(data);
       } else {
         ErrorResultData errorResultData = new ErrorResultData();
         errorResultData.addLine("Can not detect result type, unknown response format: " + json);
@@ -378,37 +384,6 @@ public class ResultBuilder {
 
         public CompositeResultData addSeparator(char buildSeparatorFrom) {
           throw new UnsupportedOperationException("This is read only result data");
-        }
-      };
-    } else if (ResultData.TYPE_OBJECT.equals(contentType)) {
-      final ObjectResultData<?> wrapped = (ObjectResultData<?>) resultData;
-      wrapperResultData = new ObjectResultData<CliJsonSerializable>() {
-        @Override
-        public ResultData addAsFile(String fileName, byte[] data, int fileType, String message,
-            boolean addTimeStampToName) {
-          throw new UnsupportedOperationException("This is read only result data");
-        }
-
-        @Override
-        public ResultData addAsFile(String fileName, String fileContents, String message,
-            boolean addTimeStampToName) {
-          throw new UnsupportedOperationException("This is read only result data");
-        }
-
-        @Override
-        public ObjectResultData<CliJsonSerializable> addCollection(
-            Collection<CliJsonSerializable> infoBeans) {
-          throw new UnsupportedOperationException("This is read only result data");
-        }
-
-        @Override
-        public ObjectResultData<CliJsonSerializable> addObject(CliJsonSerializable infoBean) {
-          throw new UnsupportedOperationException("This is read only result data");
-        }
-
-        @Override
-        public List<CliJsonSerializable> getAllObjects() {
-          return wrapped.getAllObjects();
         }
       };
     } else {

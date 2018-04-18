@@ -1133,6 +1133,21 @@ public class ParallelGatewaySenderQueue implements RegionQueue {
     }
   }
 
+  public void sendQueueRemovalMesssageForDroppedEvent(PartitionedRegion prQ, int bucketId,
+      Object key) {
+    final HashMap<String, Map<Integer, List>> temp = new HashMap<String, Map<Integer, List>>();
+    Map bucketIdToDispatchedKeys = new ConcurrentHashMap();
+    temp.put(prQ.getFullPath(), bucketIdToDispatchedKeys);
+    addRemovedEventToMap(bucketIdToDispatchedKeys, bucketId, key);
+    Set<InternalDistributedMember> recipients =
+        removalThread.getAllRecipients(sender.getCache(), temp);
+    if (!recipients.isEmpty()) {
+      ParallelQueueRemovalMessage pqrm = new ParallelQueueRemovalMessage(temp);
+      pqrm.setRecipients(recipients);
+      sender.getCache().getInternalDistributedSystem().getDistributionManager().putOutgoing(pqrm);
+    }
+  }
+
   private void addRemovedEventToMap(Map bucketIdToDispatchedKeys, int bucketId, Object key) {
     List dispatchedKeys = (List) bucketIdToDispatchedKeys.get(bucketId);
     if (dispatchedKeys == null) {
@@ -1401,6 +1416,22 @@ public class ParallelGatewaySenderQueue implements RegionQueue {
     return (BucketRegionQueue) prQ.getDataStore().getLocalBucketById(bucketId);
   }
 
+  public String displayContent() {
+    int size = 0;
+    StringBuffer sb = new StringBuffer();
+    for (PartitionedRegion prQ : this.userRegionNameToshadowPRMap.values()) {
+      if (prQ != null && prQ.getDataStore() != null) {
+        Set<BucketRegion> allLocalBuckets = prQ.getDataStore().getAllLocalBucketRegions();
+        for (BucketRegion br : allLocalBuckets) {
+          if (br.size() > 0) {
+            sb.append("bucketId=" + br.getId() + ":" + br.keySet() + ";");
+          }
+        }
+      }
+    }
+    return sb.toString();
+  }
+
   public int localSize() {
     return localSize(false);
   }
@@ -1410,7 +1441,7 @@ public class ParallelGatewaySenderQueue implements RegionQueue {
     for (PartitionedRegion prQ : this.userRegionNameToshadowPRMap.values()) {
       if (prQ != null && prQ.getDataStore() != null) {
         if (includeSecondary) {
-          size += prQ.getDataStore().getSizeOfLocalBuckets(true);
+          size += prQ.getDataStore().getSizeOfLocalBuckets();
         } else {
           size += prQ.getDataStore().getSizeOfLocalPrimaryBuckets();
         }

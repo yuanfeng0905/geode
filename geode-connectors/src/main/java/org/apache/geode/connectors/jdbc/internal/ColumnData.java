@@ -12,31 +12,36 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.management.internal.cli.result;
+package org.apache.geode.connectors.jdbc.internal;
 
-import java.util.Map;
+import java.sql.JDBCType;
 
-import org.apache.geode.management.internal.cli.json.GfJsonObject;
+class ColumnData {
+  private final String columnName;
+  private final Object value;
+  private final int dataType;
 
-/**
- *
- *
- * @since GemFire 7.0
- */
-public interface CliJsonSerializable extends CliJsonSerializableIds {
-  String FIELDS_TO_SKIP = "fieldNameToDisplayName, JSId, outputFormat, fieldsToSkipOnUI";
-  String JSID = "JSId";
-  String FIELDS_TO_DISPLAYNAME_MAPPING = "fieldNameToDisplayName";
-  String FIELDS_TO_SKIP_ON_UI = "fieldsToSkipOnUI";
-  String OUTPUT_FORMAT = "outputFormat";
+  ColumnData(String columnName, Object value, int dataType) {
+    this.columnName = columnName;
+    this.value = value;
+    this.dataType = dataType;
+  }
 
-  int getJSId();
+  String getColumnName() {
+    return columnName;
+  }
 
-  Map<String, String> getFieldNameToDisplayName();
+  Object getValue() {
+    return value;
+  }
 
-  String[] getFieldsToSkipOnUI();
+  int getDataType() {
+    return dataType;
+  }
 
-  void setFieldsToSkipOnUI(String... fieldsToSkipOnUI);
-
-  void fromJson(GfJsonObject objectStateAsjson);
+  @Override
+  public String toString() {
+    return "ColumnData [columnName=" + columnName + ", value=" + value + ", dataType="
+        + JDBCType.valueOf(dataType) + "]";
+  }
 }

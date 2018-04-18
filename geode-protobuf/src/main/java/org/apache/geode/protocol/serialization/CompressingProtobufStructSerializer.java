@@ -21,7 +21,6 @@ import com.google.protobuf.UnsafeByteOperations;
 import org.iq80.snappy.Snappy;
 
 import org.apache.geode.cache.Cache;
-import org.apache.geode.compression.SnappyCompressor;
 import org.apache.geode.internal.protocol.protobuf.v1.Struct;
 
 public class CompressingProtobufStructSerializer implements ValueSerializer {

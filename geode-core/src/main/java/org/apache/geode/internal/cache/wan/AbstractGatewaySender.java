@@ -821,8 +821,6 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
   /**
    * Check if this event can be distributed by senders.
    *
-   * @param event
-   * @param stats
    * @return boolean True if the event is allowed.
    */
   private boolean checkForDistribution(EntryEventImpl event, GatewaySenderStats stats) {
@@ -849,7 +847,10 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
     // If this gateway is not running, return
     if (!isRunning()) {
       if (isDebugEnabled) {
-        logger.debug("Returning back without putting into the gateway sender queue");
+        logger.debug("Returning back without putting into the gateway sender queue:" + event);
+      }
+      if (this.eventProcessor != null) {
+        this.eventProcessor.registerEventDroppedInPrimaryQueue(event);
       }
       return;
     }
@@ -962,7 +963,10 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
         // The sender may have stopped, after we have checked the status in the beginning.
         if (!isRunning()) {
           if (isDebugEnabled) {
-            logger.debug("Returning back without putting into the gateway sender queue");
+            logger.debug("Returning back without putting into the gateway sender queue:" + event);
+          }
+          if (this.eventProcessor != null) {
+            this.eventProcessor.registerEventDroppedInPrimaryQueue(event);
           }
           return;
         }
@@ -1055,7 +1059,6 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
    * Removes the EntryEventImpl, whose tailKey matches with the provided tailKey, from
    * tmpQueueEvents.
    *
-   * @param tailKey
    */
   public boolean removeFromTempQueueEvents(Object tailKey) {
     synchronized (this.queuedEventsSync) {
@@ -1095,6 +1098,7 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
     }
 
     statistics.setQueueSize(0);
+    statistics.setSecondaryQueueSize(0);
     statistics.setTempQueueSize(0);
   }
 
@@ -1219,9 +1223,6 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
     return region;
   }
 
-  /**
-   * @param clonedEvent
-   */
   protected abstract void setModifiedEventId(EntryEventImpl clonedEvent);
 
   public static class DefaultGatewayEventFilter
@@ -1249,6 +1250,11 @@ public abstract class AbstractGatewaySender implements GatewaySender, Distributi
   public int getEventQueueSize() {
     AbstractGatewaySenderEventProcessor localProcessor = this.eventProcessor;
     return localProcessor == null ? 0 : localProcessor.eventQueueSize();
+  }
+
+  public int getEventSecondaryQueueSize() {
+    AbstractGatewaySenderEventProcessor localProcessor = this.eventProcessor;
+    return localProcessor == null ? 0 : localProcessor.eventSecondaryQueueSize();
   }
 
   public void setEnqueuedAllTempQueueEvents(boolean enqueuedAllTempQueueEvents) {
