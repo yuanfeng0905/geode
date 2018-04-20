@@ -24,8 +24,8 @@ An inline cache holds region entries for a client application.
 
 An inline cache holds data for quick access.
 The inline cache comprises 
-a Geode region together with code deployed to servers that host 
-the region.
+a <%=vars.product_name%> region together with code deployed
+to servers that host the region.
 The inline cache sits between the client application and a
 backing data store.
 The server-deployed code communicates with the backend data store.
@@ -42,8 +42,20 @@ If the requested region entry is not in the region,
 it is a cache miss,
 and the code deployed to the server acquires the
 entry from the data store.
-<GEODE> writes the
-acquired region entry to the region
+<%=vars.product_name%> writes the acquired region entry to the region
 such that future lookups will cause a cache hit.
 
 ## Implementation and Configuration
+
+Implement the `CacheLoader` interface to handle cache read misses.
+A get operation that causes a miss invokes 
+the `CacheLoader.load` method.
+This method is expected to return the value associated with the
+cache miss.
+Therefore, the implementation must acquire the value.
+Upon return from the `CacheLoader.load` method,
+the `get` operation places the key/value into the region
+before it completes by returning the value.
+See details about cache loaders at
+[Implement a Data Loader](../developing/outside_data_sources/implementing_data_loaders.html).
+
