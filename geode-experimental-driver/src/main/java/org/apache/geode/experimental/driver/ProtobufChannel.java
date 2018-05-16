@@ -26,6 +26,10 @@ import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Set;
 
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
+
 import org.apache.geode.internal.protocol.protobuf.ProtocolVersion;
 import org.apache.geode.internal.protocol.protobuf.v1.BasicTypes;
 import org.apache.geode.internal.protocol.protobuf.v1.ClientProtocol;
@@ -36,13 +40,15 @@ import org.apache.geode.internal.protocol.protobuf.v1.ConnectionAPI;
 import org.apache.geode.internal.protocol.protobuf.v1.LocatorAPI;
 
 class ProtobufChannel {
+
+  public static final boolean USE_LZ4 = Boolean.getBoolean("gemfire.PROTOBUF_USE_LZ4");
   /**
    * Socket to a GemFire server that has Protobuf enabled.
    */
   final Socket socket;
-  final BufferedOutputStream output;
+  final OutputStream output;
   private final ValueSerializer serializer;
-  private final BufferedInputStream input;
+  private final InputStream input;
 
   public ProtobufChannel(final Set<InetSocketAddress> locators, String username, String password,
       String keyStorePath, String trustStorePath, String protocols, String ciphers,
@@ -50,8 +56,15 @@ class ProtobufChannel {
     this.serializer = serializer;
     socket = connectToAServer(locators, username, password, keyStorePath, trustStorePath, protocols,
         ciphers);
-    output = new BufferedOutputStream(socket.getOutputStream(), socket.getSendBufferSize());
-    input = new BufferedInputStream(socket.getInputStream(), socket.getReceiveBufferSize());
+
+
+    if (USE_LZ4) {
+      output = new LZ4FrameOutputStream(socket.getOutputStream(), BLOCKSIZE.SIZE_64KB);
+      input = new LZ4FrameInputStream(socket.getInputStream());
+    } else {
+      output = new BufferedOutputStream(socket.getOutputStream(), socket.getSendBufferSize());
+      input = new BufferedInputStream(socket.getInputStream(), socket.getReceiveBufferSize());
+    }
   }
 
   public void close() throws IOException {

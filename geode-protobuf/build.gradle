@@ -27,6 +27,7 @@ dependencies {
     testCompile 'org.powermock:powermock-api-mockito:' + project.'powermock.version'
 
     compile 'com.google.protobuf:protobuf-java:' + project.'protobuf-java.version'
+    compile group: 'org.lz4', name: 'lz4-java', version: '1.4.1'
     testCompile files(project(':geode-old-versions').sourceSets.main.output)
     testCompile 'com.pholser:junit-quickcheck-core:' + project.'junit-quickcheck.version'
     testCompile 'com.pholser:junit-quickcheck-generators:' + project.'junit-quickcheck.version'

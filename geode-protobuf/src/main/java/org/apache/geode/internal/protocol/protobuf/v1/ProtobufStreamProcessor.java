@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
 import org.apache.logging.log4j.Logger;
 
 import org.apache.geode.annotations.Experimental;
@@ -27,6 +30,7 @@ import org.apache.geode.internal.protocol.protobuf.statistics.ClientStatistics;
 import org.apache.geode.internal.protocol.protobuf.v1.registry.ProtobufOperationContextRegistry;
 import org.apache.geode.internal.protocol.protobuf.v1.serializer.ProtobufProtocolSerializer;
 import org.apache.geode.internal.protocol.protobuf.v1.serializer.exception.InvalidProtocolMessageException;
+import org.apache.geode.internal.protocol.protobuf.v1.state.AcceptMessages;
 
 /**
  * This object handles an incoming stream containing protobuf messages. It parses the protobuf
@@ -35,9 +39,13 @@ import org.apache.geode.internal.protocol.protobuf.v1.serializer.exception.Inval
  */
 @Experimental
 public class ProtobufStreamProcessor {
+  public static final boolean USE_LZ4 = Boolean.getBoolean("gemfire.PROTOBUF_USE_LZ4");
   private final ProtobufProtocolSerializer protobufProtocolSerializer;
   private final ProtobufOpsProcessor protobufOpsProcessor;
   private static final Logger logger = LogService.getLogger();
+
+  private InputStream compressionInputStream;
+  private OutputStream compressionOutputStream;
 
   public ProtobufStreamProcessor() {
     protobufProtocolSerializer = new ProtobufProtocolSerializer();
@@ -46,12 +54,19 @@ public class ProtobufStreamProcessor {
 
   public void receiveMessage(InputStream inputStream, OutputStream outputStream,
       MessageExecutionContext executionContext) throws IOException {
+    if (this.compressionInputStream != null) {
+      inputStream = compressionInputStream;
+    }
+    if (this.compressionOutputStream != null) {
+      outputStream = compressionOutputStream;
+    }
     try {
       processOneMessage(inputStream, outputStream, executionContext);
     } catch (InvalidProtocolMessageException e) {
       logger.info("Invalid message", e);
       throw new IOException(e);
     }
+
   }
 
   private void processOneMessage(InputStream inputStream, OutputStream outputStream,
@@ -74,5 +89,13 @@ public class ProtobufStreamProcessor {
     ClientProtocol.Message response = protobufOpsProcessor.process(message, executionContext);
     statistics.messageSent(response.getSerializedSize());
     protobufProtocolSerializer.serialize(response, outputStream);
+    outputStream.flush();
+
+    if (message.hasHandshakeRequest() && compressionInputStream == null
+        && (executionContext.getConnectionState() instanceof AcceptMessages) && USE_LZ4
+        && !(executionContext instanceof LocatorMessageExecutionContext)) {
+      compressionOutputStream = new LZ4FrameOutputStream(outputStream, BLOCKSIZE.SIZE_64KB);
+      compressionInputStream = new LZ4FrameInputStream(inputStream);
+    }
   }
 }

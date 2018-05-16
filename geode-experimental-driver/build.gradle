@@ -18,7 +18,7 @@
 dependencies {
     compile project(':geode-common')
     compile project(':geode-protobuf-messages')
-
+    compile group: 'org.lz4', name: 'lz4-java', version: '1.4.1'
     compile 'com.google.protobuf:protobuf-java:' + project.'protobuf-java.version'
     testCompile project(':geode-core')
     testCompile project(':geode-junit')
