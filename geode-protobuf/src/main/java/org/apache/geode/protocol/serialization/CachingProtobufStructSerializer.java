@@ -15,9 +15,9 @@
 package org.apache.geode.protocol.serialization;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.NullValue;
@@ -33,10 +33,9 @@ import org.apache.geode.pdx.PdxInstance;
 import org.apache.geode.pdx.PdxInstanceFactory;
 
 public class CachingProtobufStructSerializer implements ValueSerializer {
-  static final String PROTOBUF_STRUCT = "__PROTOBUF_STRUCT_AS_PDX";
   private Cache cache;
-  private final Map<String, CachedString> writeCache = new HashMap<>();
-  private final Map<Integer, String> readCache = new HashMap<>();
+  private final Map<String, CachedString> writeCache = new ConcurrentHashMap<>();
+  private final Map<Integer, String> readCache = new ConcurrentHashMap<>();
 
   @Override
   public ByteString serialize(Object object) throws IOException {
@@ -48,13 +47,14 @@ public class CachingProtobufStructSerializer implements ValueSerializer {
     PdxInstance pdxInstance = (PdxInstance) object;
 
     CachingStruct.Builder structBuilder = CachingStruct.newBuilder();
+    structBuilder.setTypeName(cacheWrite(pdxInstance.getClassName()));
+
     for (String fieldName : pdxInstance.getFieldNames()) {
       Object value = pdxInstance.getField(fieldName);
       Field serialized = serializeField(fieldName, value);
       structBuilder.addFields(serialized);
     }
 
-    structBuilder.setTypeName(cacheWrite(pdxInstance.getClassName()));
 
     return structBuilder.build();
   }
@@ -96,8 +96,36 @@ public class CachingProtobufStructSerializer implements ValueSerializer {
   }
 
   private CachedString cacheWrite(final String string) {
-    return writeCache.computeIfAbsent(string,
-        name -> CachedString.newBuilder().setId(writeCache.size() + 1).setValue(name).build());
+    CachedString result;
+    if (string.isEmpty()) {
+      result = CachedString.getDefaultInstance();
+    } else {
+      CachedString cachedValue = writeCache.get(string);
+      if (cachedValue != null) {
+        result = cachedValue;
+      } else {
+        int id = writeCache.size() + 1;
+        writeCache.put(string, CachedString.newBuilder().setId(id).build());
+        result = CachedString.newBuilder().setId(id).setValue(string).build();
+      }
+    }
+
+    return result;
+  }
+
+  private String cacheRead(final CachedString fieldName) {
+    String value = fieldName.getValue();
+    int id = fieldName.getId();
+    if (id == 0) {
+      return value;
+    }
+
+    if (!value.isEmpty()) {
+      readCache.put(id, value);
+      return value;
+    }
+
+    return readCache.get(id);
   }
 
   @Override
@@ -141,17 +169,6 @@ public class CachingProtobufStructSerializer implements ValueSerializer {
     }
 
     return pdxInstanceFactory.create();
-  }
-
-  private String cacheRead(final CachedString fieldName) {
-    String value = fieldName.getValue();
-    int id = fieldName.getId();
-    if (value == null) {
-      value = readCache.get(id);
-    } else if (id != 0) {
-      readCache.put(id, value);
-    }
-    return value;
   }
 
   private Object deserializeField(Field value) {

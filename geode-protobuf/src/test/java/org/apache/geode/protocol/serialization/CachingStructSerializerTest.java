@@ -66,6 +66,8 @@ public class CachingStructSerializerTest {
           int.class, long.class, byte.class, byte[].class, double.class,
           PdxInstance.class}) @From(PdxInstanceGenerator.class) PdxInstance original)
       throws IOException, ClassNotFoundException {
+    CachingProtobufStructSerializer serializer = new CachingProtobufStructSerializer();
+    serializer.init(cache);
     ByteString bytes = serializer.serialize(original);
     PdxInstance actual = (PdxInstance) serializer.deserialize(bytes);
     assertThat(original).isEqualTo(actual);
