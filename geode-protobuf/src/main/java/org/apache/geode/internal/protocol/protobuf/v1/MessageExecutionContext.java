@@ -14,6 +14,8 @@
  */
 package org.apache.geode.internal.protocol.protobuf.v1;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import org.apache.geode.annotations.Experimental;
@@ -29,6 +31,11 @@ import org.apache.geode.protocol.serialization.ValueSerializer;
 
 @Experimental
 public abstract class MessageExecutionContext {
+
+  private InputStream compressionInputStream;
+
+  private OutputStream compressionOutputStream;
+
   protected final ClientStatistics statistics;
   protected final SecurityService securityService;
   protected ConnectionState connectionState;
@@ -69,4 +76,21 @@ public abstract class MessageExecutionContext {
   public abstract void authenticate(Properties properties);
 
   public abstract void setValueSerializer(ValueSerializer valueSerializer);
+
+  public OutputStream getCompressionOutputStream() {
+    return compressionOutputStream;
+  }
+
+  public void setCompressionOutputStream(final OutputStream compressionOutputStream) {
+    this.compressionOutputStream = compressionOutputStream;
+  }
+
+  public InputStream getCompressionInputStream() {
+    return compressionInputStream;
+  }
+
+  public void setCompressionInputStream(final InputStream compressionInputStream) {
+    this.compressionInputStream = compressionInputStream;
+  }
+
 }

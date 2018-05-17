@@ -44,8 +44,6 @@ public class ProtobufStreamProcessor {
   private final ProtobufOpsProcessor protobufOpsProcessor;
   private static final Logger logger = LogService.getLogger();
 
-  private InputStream compressionInputStream;
-  private OutputStream compressionOutputStream;
 
   public ProtobufStreamProcessor() {
     protobufProtocolSerializer = new ProtobufProtocolSerializer();
@@ -54,11 +52,9 @@ public class ProtobufStreamProcessor {
 
   public void receiveMessage(InputStream inputStream, OutputStream outputStream,
       MessageExecutionContext executionContext) throws IOException {
-    if (this.compressionInputStream != null) {
-      inputStream = compressionInputStream;
-    }
-    if (this.compressionOutputStream != null) {
-      outputStream = compressionOutputStream;
+    if (executionContext.getCompressionInputStream() != null) {
+      inputStream = executionContext.getCompressionInputStream();
+      outputStream = executionContext.getCompressionOutputStream();
     }
     try {
       processOneMessage(inputStream, outputStream, executionContext);
@@ -91,11 +87,12 @@ public class ProtobufStreamProcessor {
     protobufProtocolSerializer.serialize(response, outputStream);
     outputStream.flush();
 
-    if (message.hasHandshakeRequest() && compressionInputStream == null
+    if (message.hasHandshakeRequest() && executionContext.getCompressionInputStream() == null
         && (executionContext.getConnectionState() instanceof AcceptMessages) && USE_LZ4
         && !(executionContext instanceof LocatorMessageExecutionContext)) {
-      compressionOutputStream = new LZ4FrameOutputStream(outputStream, BLOCKSIZE.SIZE_64KB);
-      compressionInputStream = new LZ4FrameInputStream(inputStream);
+      executionContext
+          .setCompressionOutputStream(new LZ4FrameOutputStream(outputStream, BLOCKSIZE.SIZE_64KB));
+      executionContext.setCompressionInputStream(new LZ4FrameInputStream(inputStream));
     }
   }
 }
