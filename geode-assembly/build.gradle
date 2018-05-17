@@ -215,6 +215,7 @@ def cp = {
 
         // dependencies from geode-protobuf
         it.contains('protobuf-java') ||
+        it.contains('lz4-java') ||
 
         // dependencies from geode-connectors
         it.contains('HikariCP')
