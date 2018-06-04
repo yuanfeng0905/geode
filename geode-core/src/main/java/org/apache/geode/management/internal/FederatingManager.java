@@ -116,6 +116,7 @@ public class FederatingManager extends Manager {
       messenger.broadcastManagerInfo();
 
     } catch (Exception e) {
+      logger.info("GEM-1167 Manager start failed with exception {}", e);
       running = false;
       throw new ManagementException(e);
     }
@@ -347,9 +348,22 @@ public class FederatingManager extends Manager {
       this.member = member;
     }
 
-    public DistributedMember call() {
+    public synchronized DistributedMember call() {
       Region<String, Object> proxyMonitoringRegion;
       Region<NotificationKey, Notification> proxyNotificationRegion;
+      String appender = MBeanJMXAdapter.getUniqueIDForMember(member);
+      String monitoringRegionName = ManagementConstants.MONITORING_REGION + "_" + appender;
+      String notificationRegionName = ManagementConstants.NOTIFICATION_REGION + "_" + appender;
+
+      logger.info("GEM-1167 GIITask - Start - creating notification and monitoring regions {} {}", monitoringRegionName, notificationRegionName);
+
+      if (cache.getRegion(monitoringRegionName) != null
+          && cache.getRegion(notificationRegionName) != null) {
+        logger.info(
+            "GEM-1167 federatingManager distributedMember: notification and monitoring regions exist");
+        return member;
+      }
+
       try {
 
         // GII wont start at all if its interrupted
@@ -398,15 +412,12 @@ public class FederatingManager extends Manager {
           boolean proxyMonitoringRegionCreated = false;
           boolean proxyNotifRegionCreated = false;
 
-          String appender = MBeanJMXAdapter.getUniqueIDForMember(member);
-
           try {
             if (!running) {
               return null;
             }
             proxyMonitoringRegion =
-                cache.createVMRegion(ManagementConstants.MONITORING_REGION + "_" + appender,
-                    monitoringRegionAttrs, internalArgs);
+                cache.createVMRegion(monitoringRegionName, monitoringRegionAttrs, internalArgs);
             proxyMonitoringRegionCreated = true;
 
           } catch (TimeoutException | RegionExistsException | IOException
@@ -417,13 +428,15 @@ public class FederatingManager extends Manager {
             throw new ManagementException(e);
           }
 
+          logger.info("GEM-1167 GIITask - created monitoring region {}", monitoringRegionName);
+
           try {
             if (!running) {
+              logger.info("GEM-1167 GIITask - NO LONGER RUNNING - WAAATTT");
               return null;
             }
             proxyNotificationRegion =
-                cache.createVMRegion(ManagementConstants.NOTIFICATION_REGION + "_" + appender,
-                    notifRegionAttrs, internalArgs);
+                cache.createVMRegion(notificationRegionName, notifRegionAttrs, internalArgs);
             proxyNotifRegionCreated = true;
           } catch (TimeoutException | RegionExistsException | IOException
               | ClassNotFoundException e) {

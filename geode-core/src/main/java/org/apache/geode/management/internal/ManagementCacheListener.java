@@ -52,6 +52,7 @@ public class ManagementCacheListener extends CacheListenerAdapter<String, Object
     try {
       objectName = ObjectName.getInstance(event.getKey());
       Object newObject = event.getNewValue();
+      logger.info("GEM-1167 afterCreate {} on {}", objectName, event.getRegion());
       proxyHelper.createProxy(event.getDistributedMember(), objectName, event.getRegion(),
           newObject);
     } catch (Exception e) {
@@ -69,6 +70,7 @@ public class ManagementCacheListener extends CacheListenerAdapter<String, Object
     try {
       objectName = ObjectName.getInstance(event.getKey());
       Object oldObject = event.getOldValue();
+      logger.info("GEM-1167 afterDestroy {} on {}", objectName, event.getRegion());
       proxyHelper.removeProxy(event.getDistributedMember(), objectName, oldObject);
     } catch (Exception e) {
       if (logger.isDebugEnabled()) {
@@ -88,6 +90,7 @@ public class ManagementCacheListener extends CacheListenerAdapter<String, Object
       }
       objectName = ObjectName.getInstance(event.getKey());
 
+      logger.info("GEM-1167 afterUpdate {} on {}", objectName, event.getRegion());
       ProxyInfo proxyInfo = proxyHelper.findProxyInfo(objectName);
       if (proxyInfo != null) {
         ProxyInterface proxyObj = (ProxyInterface) proxyInfo.getProxyInstance();

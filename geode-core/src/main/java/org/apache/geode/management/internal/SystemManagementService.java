@@ -485,6 +485,7 @@ public class SystemManagementService extends BaseManagementService {
         if (this.agent != null && (this.agent.isRunning() || this.agent.isHttpServiceRunning())) {
           this.agent.stopAgent();
         }
+        federatingManager = null;
       }
     }
   }
